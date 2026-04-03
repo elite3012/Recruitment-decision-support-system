@@ -1,0 +1,29 @@
+# Core frameworks
+pandas>=2.2.0
+numpy>=1.26.0
+
+# Machine Learning & NLP
+scikit-learn>=1.5.0
+spacy>=3.8.0
+torch>=2.2.0
+sentence-transformers>=3.0.0
+
+# Database
+sqlalchemy>=2.0.25
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# Development and testing
+pytest>=8.0.0
+pytest-cov>=5.0.0
+black>=24.0.0
+flake8>=7.0.0
+
+# Optional: for production deployment
+gunicorn>=22.0.0
+
+fastapi
+python-multipart
+uvicorn

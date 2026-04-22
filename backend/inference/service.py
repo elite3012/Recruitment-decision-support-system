@@ -49,7 +49,8 @@ class MatchingInferenceService:
                 'desired_job': getattr(candidate, 'desired_job', '') or '',
                 'skills': getattr(candidate, 'skills', '') or '',
                 'experience_years': getattr(candidate, 'work_experience', getattr(candidate, 'experience_years', 0)) or 0,
-                'degree': getattr(candidate, 'degree', '') or ''
+                'degree': getattr(candidate, 'degree', '') or '',
+                'location': getattr(candidate, 'location', '') or getattr(candidate, 'workplace_desired', '') or 'Unknown'
             }
             
             job_dict = {
@@ -57,7 +58,8 @@ class MatchingInferenceService:
                 'job_description': getattr(job, 'job_description', '') or '',
                 'job_requirements': getattr(job, 'job_requirements', '') or '',
                 'years_of_experience': getattr(job, 'years_of_experience', 0) or 0,
-                'degree_required': getattr(job, 'degree_required', '') or ''
+                'degree_required': getattr(job, 'degree_required', '') or '',
+                'location': getattr(job, 'location', '') or getattr(job, 'job_address', '') or 'Unknown'
             }
             
             scores = self.matcher.match(job_dict, cand_dict, weights)
@@ -113,7 +115,9 @@ class MatchingInferenceService:
                         'desired_job': getattr(c, 'desired_job', '') or '',
                         'skills': getattr(c, 'skills', '') or '',
                         'experience_years': getattr(c, 'work_experience', '') or getattr(c, 'experience_years', '') or '0',
-                        'degree': getattr(c, 'degree', '') or ''
+                          'degree': getattr(c, 'degree', '') or '',
+                          'expected_salary': getattr(c, 'desired_salary', '') or getattr(c, 'salary', '') or 'Negotiable',
+                          'gender': getattr(c, 'gender', '') or 'Unknown'
                     })
                 except Exception as ce:
                     logger.warning(f"Skipping candidate {c} due to mapping error: {ce}")

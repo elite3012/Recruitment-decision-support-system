@@ -1,7 +1,7 @@
 ﻿import sys
 with open('backend/main.py', 'r', encoding='utf-8') as f:
     lines = f.readlines()
-new_routes = \"\"\"
+new_routes = """
 @app.get("/api/jobs/{job_id}/decisions")
 def get_job_decisions(job_id: int):
     try:
@@ -24,7 +24,7 @@ def get_job_decisions(job_id: int):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
-\"\"\"
+"""
 insert_idx = -1
 for i, l in enumerate(lines):
     if 'uvicorn.run("main:app"' in l:

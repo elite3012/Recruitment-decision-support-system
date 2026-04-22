@@ -33,6 +33,15 @@ export const saveCandidateDecision = async (jobId: number, candidateId: number, 
   return data;
 };
 
+export const saveBulkDecision = async (jobId: number, candidateIds: number[], action: string, notes: string = "") => {
+  const { data } = await api.post(`/jobs/${jobId}/bulk-decisions`, {
+    candidate_ids: candidateIds,
+    action,
+    notes
+  });
+  return data;
+};
+
 export const getJobDecisions = async (jobId: number) => {
   const { data } = await api.get(`/jobs/${jobId}/decisions`);
   return data;

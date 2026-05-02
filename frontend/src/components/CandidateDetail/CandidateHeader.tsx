@@ -35,17 +35,29 @@ const CandidateHeader: React.FC<CandidateHeaderProps> = ({
         <div className="flex gap-4">
           <button 
             onClick={() => handleDecision('Hold')}
-            className={`px-6 py-2 rounded-lg font-bold tracking-wide transition-all ${decision === 'Hold' ? 'bg-neu-surface shadow-neu-inner text-neu-warning' : 'bg-neu-surface shadow-neu active:shadow-neu-inner text-neu-text hover:text-neu-warning'}`}>
+            className={`px-6 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 shadow-neu ${
+              decision === 'Hold' 
+                ? 'bg-[#FE9900] text-white' 
+                : 'bg-neu-surface text-neu-text hover:bg-[#FE9900] hover:text-white'
+            }`}>
             Hold
           </button>
           <button 
             onClick={() => handleDecision('Reject')}
-            className={`px-6 py-2 rounded-lg flex items-center gap-2 font-bold tracking-wide transition-all ${decision === 'Reject' ? 'bg-neu-surface shadow-neu-inner text-neu-danger' : 'bg-neu-surface shadow-neu active:shadow-neu-inner text-neu-text hover:text-neu-danger'}`}>
+            className={`px-6 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 shadow-neu ${
+              decision === 'Reject' 
+                ? 'bg-[#FF2157] text-white' 
+                : 'bg-neu-surface text-neu-text hover:bg-[#FF2157] hover:text-white'
+            }`}>
             Reject
           </button>
           <button 
             onClick={() => handleDecision('Shortlist')}
-            className={`px-6 py-2 rounded-lg flex items-center gap-2 font-bold tracking-wide transition-all ${decision === 'Shortlist' ? 'bg-neu-surface shadow-neu-inner text-neu-success' : 'bg-neu-surface shadow-neu active:shadow-neu-inner text-neu-success hover:text-neu-success'}`}>
+            className={`px-6 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 shadow-neu ${
+              decision === 'Shortlist' 
+                ? 'bg-[#00A63D] text-white' 
+                : 'bg-neu-surface text-neu-text hover:bg-[#00A63D] hover:text-white'
+            }`}>
             Shortlist
           </button>
         </div>

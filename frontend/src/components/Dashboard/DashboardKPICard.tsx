@@ -11,13 +11,17 @@ interface DashboardKPICardProps {
 
 const DashboardKPICard: React.FC<DashboardKPICardProps> = ({ title, value, icon: Icon, iconColorClass, iconBgClass }) => {
   return (
-    <div className="bg-neu-surface rounded-xl p-6 shadow-neu flex items-center justify-between">
+    <div className="bg-neu-surface rounded-3xl p-8 shadow-neu transition-all duration-300 hover:shadow-neu-sm cursor-default flex items-center justify-between border-b-4 border-transparent hover:border-neu-primary group">
       <div>
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">{title}</p>
-        <p className="text-3xl font-bold font-mono text-neu-text mt-2">{value}</p>
+        <p className="text-[10px] font-black text-neu-text/40 uppercase tracking-[0.2em] font-mono mb-2">{title}</p>
+        <p className="text-4xl font-black font-primary text-neu-text tracking-tighter">{value}</p>
       </div>
-      <div className={`p-3 rounded-lg shadow-neu-inner ${iconColorClass}`}>
-        <Icon className="w-6 h-6" />
+      <div className={`p-5 rounded-2xl shadow-neu-inner transition-all duration-300 ${
+        title.toLowerCase().includes('job') ? 'text-neu-primary' : 
+        title.toLowerCase().includes('candidate') ? 'text-neu-success' : 
+        'text-neu-warning'
+      }`}>
+        <Icon className="w-10 h-10" />
       </div>
     </div>
   );

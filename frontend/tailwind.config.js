@@ -7,26 +7,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        neu: {
-          primary: '#006666',
-          secondary: '#F1F2F5',
-          success: '#00A63D',
-          warning: '#FE9900',
-          danger: '#FF2157',
-          surface: '#E7E5E4',
-          text: '#1E2938',
-          neutral: '#E7E5E4',
-        }
+        'neu-primary': '#0D9488', // Vibrant Teal
+        'neu-secondary': '#E2E8F0', // Slightly darker slate-gray
+        'neu-success': '#00A63D',
+        'neu-warning': '#FE9900',
+        'neu-danger': '#FF2157',
+        'neu-surface': '#DDE1E4', // Darker surface for better neumorphism visibility
+        'neu-text': '#1E2938',
       },
       fontFamily: {
         primary: ['"Space Mono"', 'monospace'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
-        'neu': '8px 8px 16px #c4c3c2, -8px -8px 16px #ffffff',
-        'neu-sm': '4px 4px 8px #c4c3c2, -4px -4px 8px #ffffff',
-        'neu-inner': 'inset 8px 8px 16px #c4c3c2, inset -8px -8px 16px #ffffff',
-        'neu-inner-sm': 'inset 4px 4px 8px #c4c3c2, inset -4px -4px 8px #ffffff',
+        'neu': '12px 12px 24px #b8bcc0, -12px -12px 24px #ffffff',
+        'neu-sm': '6px 6px 12px #b8bcc0, -6px -6px 12px #ffffff',
+        'neu-inner': 'inset 10px 10px 20px #b8bcc0, inset -10px -10px 20px #ffffff',
+        'neu-inner-sm': 'inset 4px 4px 8px #b8bcc0, inset -4px -4px 8px #ffffff',
+        'neu-primary': '8px 8px 16px #0b7a70, -8px -8px 16px #0faea0',
+        'neu-success': '8px 8px 16px #008531, -8px -8px 16px #00c749',
+        'neu-warning': '8px 8px 16px #cb7a00, -8px -8px 16px #ffb800',
+        'neu-danger': '8px 8px 16px #cc1a46, -8px -8px 16px #ff2868',
       }
     },
   },

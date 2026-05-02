@@ -53,6 +53,34 @@ def get_dashboard_summary():
             "system_status": "Database Unreachable",
         }
 
+@app.get("/api/dashboard/distributions")
+def get_dashboard_distributions():
+    """Distributions for jobs and candidates"""
+    try:
+        jobs = inference_service.db.get_all_jobs()
+        candidates = inference_service.db.get_all_candidates()
+
+        job_counts = {}
+        for j in jobs:
+            ind = getattr(j, 'industry', '') or 'Unknown'
+            job_counts[ind] = job_counts.get(ind, 0) + 1
+
+        candidate_counts = {}
+        for c in candidates:
+            role = getattr(c, 'desired_job', '') or 'Unknown'
+            candidate_counts[role] = candidate_counts.get(role, 0) + 1
+        
+        job_data = [{"name": (k[:20] + '...') if len(k) > 20 else k, "value": v} for k, v in sorted(job_counts.items(), key=lambda x: x[1], reverse=True)[:6]]
+        candidate_data = [{"name": (k[:20] + '...') if len(k) > 20 else k, "value": v} for k, v in sorted(candidate_counts.items(), key=lambda x: x[1], reverse=True)[:6]]
+
+        return {
+            "jobs_by_industry": job_data,
+            "candidates_by_role": candidate_data
+        }
+    except Exception as e:
+        print(f"Error fetching dashboard distributions: {e}")
+        return {"jobs_by_industry": [], "candidates_by_role": []}
+
 @app.get("/api/jobs")
 def get_jobs():
     """List available jobs for the selection view."""
@@ -95,6 +123,8 @@ def rank_candidates(job_id: int, top_k: int = 50):
                 "title": cand.get('desired_job'),
                 "location": cand.get('location'),
                 "experience": cand.get('experience_years'),
+                "expected_salary": cand.get('expected_salary'),
+                "gender": cand.get('gender'),
                 "scores": scores,
                 "decision": decision_map.get(c_id)
             })
@@ -170,6 +200,36 @@ class DecisionRequest(BaseModel):
     notes: str = ""
     recruiter_name: str = "Admin"
 
+class BulkDecisionRequest(BaseModel):
+    candidate_ids: list[int]
+    action: str
+    notes: str = ""
+
+@app.post("/api/jobs/{job_id}/bulk-decisions")
+def save_bulk_decision(job_id: int, request: BulkDecisionRequest):
+    """Persist recruiter action to the database for multiple candidates"""
+    try:
+        updated = 0
+        for candidate_id in request.candidate_ids:
+            match = inference_service.db.get_match(job_id, candidate_id)
+            if not match:
+                scores = inference_service.match_candidate_to_job(candidate_id=candidate_id, job_id=job_id)
+                match_data = {
+                    "job_id": job_id, "user_id": candidate_id,
+                    "fit_score": scores.get("overall_score", 0.0),
+                    "fit_percentage": int(scores.get("overall_score", 0.0) * 100)
+                }
+                match = inference_service.db.add_match(match_data)
+            action_data = {
+                "job_id": job_id, "user_id": candidate_id,
+                "match_id": match.match_id, "decision": request.action, "notes": request.notes
+            }
+            inference_service.db.add_recruiter_action(action_data)
+            updated += 1
+        return {"status": "success", "message": f"{request.action} recorded for {updated} candidates"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/jobs/{job_id}/candidates/{candidate_id}/decisions")
 def save_decision(job_id: int, candidate_id: int, decision: DecisionRequest):
     """Persist recruiter action to the database via storage layer logic"""
@@ -226,5 +286,28 @@ def get_job_decisions(job_id: int):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.get("/api/jobs/{job_id}/decisions")
+def get_job_decisions(job_id: int):
+    try:
+        actions = inference_service.db.get_recruiter_actions(job_id)
+        results = []
+        for action in actions:
+            cand = inference_service.db.get_candidate_by_id(action.user_id)
+            if cand:
+                results.append({
+                    "action_id": action.action_id,
+                    "candidate_id": action.user_id,
+                    "name": getattr(cand, 'user_name', '') or getattr(cand, 'name', '') or 'Unknown',
+                    "title": getattr(cand, 'desired_job', '') or '',
+                    "decision": getattr(action, 'decision', ''),
+                    "notes": getattr(action, 'notes', '') or '',
+                    "timestamp": str(getattr(action, 'updated_at', '')) or str(getattr(action, 'created_at', '')) or ''
+                })
+        return {"job_id": job_id, "decisions": results}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -7,24 +7,24 @@ interface CandidateTabsProps {
 
 const CandidateTabs: React.FC<CandidateTabsProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="border-b border-slate-200">
-      <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+    <div className="flex mb-6">
+      <nav className="flex space-x-2 p-1 bg-neu-surface shadow-neu-inner rounded-lg" aria-label="Tabs">
         <button
           onClick={() => setActiveTab('summary')}
-          className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition ${
+          className={`whitespace-nowrap py-2 px-4 rounded-md font-bold text-sm transition-all ${
             activeTab === 'summary'
-              ? 'border-indigo-500 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              ? 'bg-neu-surface shadow-neu text-neu-primary'
+              : 'text-slate-500 hover:text-neu-text'
           }`}
         >
           Recruiter Match Summary
         </button>
         <button
           onClick={() => setActiveTab('profile')}
-          className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition ${
+          className={`whitespace-nowrap py-2 px-4 rounded-md font-bold text-sm transition-all ${
             activeTab === 'profile'
-              ? 'border-indigo-500 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              ? 'bg-neu-surface shadow-neu text-neu-primary'
+              : 'text-slate-500 hover:text-neu-text'
           }`}
         >
           Full Candidate Profile

@@ -9,15 +9,15 @@ const DecisionHistoryTable: React.FC<DecisionHistoryTableProps> = ({ decisions }
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white border text-sm border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1">
+    <div className="bg-neu-surface border-none text-sm rounded-xl overflow-hidden shadow-neu flex-1">
       <table className="w-full text-left">
-        <thead className="bg-slate-50 border-b border-slate-200 text-xs font-bold tracking-wider text-slate-500 uppercase">
+        <thead className="bg-neu-surface border-b border-transparent shadow-sm text-xs font-bold tracking-wider text-slate-500 uppercase">
           <tr>
-            <th className="p-4 px-6">Timestamp</th>
-            <th className="p-4 px-6">Candidate</th>
-            <th className="p-4 px-6">Recruiter</th>
-            <th className="p-4 px-6">Decision</th>
-            <th className="p-4 px-6">Notes</th>
+            <th className="p-4 px-6 border-b-2 border-neu-surface shadow-sm">Timestamp</th>
+            <th className="p-4 px-6 border-b-2 border-neu-surface shadow-sm">Candidate</th>
+            <th className="p-4 px-6 border-b-2 border-neu-surface shadow-sm">Recruiter</th>
+            <th className="p-4 px-6 border-b-2 border-neu-surface shadow-sm">Decision</th>
+            <th className="p-4 px-6 border-b-2 border-neu-surface shadow-sm">Notes</th>
           </tr>
         </thead>
         <tbody>
@@ -27,30 +27,30 @@ const DecisionHistoryTable: React.FC<DecisionHistoryTableProps> = ({ decisions }
             const isShortlisted = action === 'Shortlist';
 
             return (
-              <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                <td className="p-4 px-6 text-slate-500 whitespace-nowrap">
+              <tr key={idx} className="border-b border-transparent hover:shadow-neu-inner transition-shadow bg-neu-surface">
+                <td className="p-4 px-6 text-slate-500 whitespace-nowrap font-mono">
                   {decision.timestamp ? new Date(decision.timestamp).toLocaleString() : '-'}
                 </td>
-                <td className="p-4 px-6 font-medium text-slate-900 border-l border-slate-50">
+                <td className="p-4 px-6 font-medium text-neu-text">
                   <div className="flex flex-col">
                     <span 
-                      className="hover:text-blue-600 cursor-pointer transition-colors" 
+                      className="hover:text-neu-primary cursor-pointer transition-colors" 
                       onClick={() => navigate(`/candidate/${decision.candidate_id}`)}
                     >
                       {decision.name}
                     </span>
-                    <span className="text-xs text-slate-400 font-normal mt-0.5">
+                    <span className="text-xs text-slate-400 font-normal mt-0.5 font-mono">
                       {decision.title || 'N/A'}
                     </span>
                   </div>
                 </td>
-                <td className="p-4 px-6 text-slate-600">Admin</td>
+                <td className="p-4 px-6 text-slate-500">Admin</td>
                 <td className="p-4 px-6">
-                  <span className={`px-2 py-0.5 text-[10px] leading-none uppercase font-bold tracking-wider rounded-md ${isRejected ? 'bg-slate-200 text-slate-600' : isShortlisted ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}`}>
+                  <span className={`px-3 py-1 text-[10px] leading-none uppercase font-bold tracking-wider rounded-md shadow-neu-inner ${isRejected ? 'bg-neu-surface text-slate-500' : isShortlisted ? 'bg-neu-surface text-neu-success' : 'bg-neu-surface text-neu-warning'}`}>
                     {action}
                   </span>
                 </td>
-                <td className="p-4 px-6 text-slate-600 max-w-sm truncate" title={decision.notes}>
+                <td className="p-4 px-6 text-slate-500 max-w-sm truncate" title={decision.notes}>
                   {decision.notes || '-'}
                 </td>
               </tr>

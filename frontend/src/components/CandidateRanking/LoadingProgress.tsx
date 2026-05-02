@@ -28,15 +28,15 @@ const LoadingProgress = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-16 space-y-6 h-[40vh] border border-slate-200 rounded-xl bg-white shadow-sm mt-4">
-      <div className="w-full max-w-md bg-slate-100 rounded-full h-2 overflow-hidden relative">
+    <div className="flex flex-col items-center justify-center p-16 space-y-6 h-[40vh] rounded-xl bg-neu-surface shadow-neu mt-4">
+      <div className="w-full max-w-md bg-neu-surface shadow-neu-inner rounded-full h-3 overflow-hidden relative">
         <div 
-          className="bg-blue-600 h-2 transition-all duration-1000 ease-out"
+          className="bg-neu-primary h-3 transition-all duration-1000 ease-out"
           style={{ width: `${Math.min(((stage + 1) / stages.length) * 100, 95)}%` }}
         />
       </div>
       <div className="text-center">
-        <p className="text-sm font-semibold text-slate-800 animate-pulse">{stages[stage]}</p>
+        <p className="text-sm font-semibold text-neu-text animate-pulse">{stages[stage]}</p>
         <p className="text-xs text-slate-400 mt-2 font-mono">Elapsed parsing time: {elapsed}s</p>
       </div>
     </div>

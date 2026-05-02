@@ -11,12 +11,12 @@ interface DashboardKPICardProps {
 
 const DashboardKPICard: React.FC<DashboardKPICardProps> = ({ title, value, icon: Icon, iconColorClass, iconBgClass }) => {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex items-center justify-between">
+    <div className="bg-neu-surface rounded-xl p-6 shadow-neu flex items-center justify-between">
       <div>
         <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">{title}</p>
-        <p className="text-3xl font-bold text-slate-900 mt-2">{value}</p>
+        <p className="text-3xl font-bold font-mono text-neu-text mt-2">{value}</p>
       </div>
-      <div className={`p-3 rounded-lg ${iconBgClass} ${iconColorClass}`}>
+      <div className={`p-3 rounded-lg shadow-neu-inner ${iconColorClass}`}>
         <Icon className="w-6 h-6" />
       </div>
     </div>

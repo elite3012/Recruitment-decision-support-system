@@ -3,7 +3,31 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --neu-surface: #DDE1E4;
+    --neu-secondary: #E2E8F0;
+    --neu-primary: #0D9488;
+    --neu-text: #1E2938;
+    --neu-shadow-dark: #b8bcc0;
+    --neu-shadow-light: #ffffff;
+  }
+
   body {
-    @apply antialiased font-sans bg-slate-50 text-slate-900;
+    @apply antialiased;
+    background-color: var(--neu-surface);
+    color: var(--neu-text);
+    font-family: 'Space Mono', monospace;
+  }
+}
+
+@layer components {
+  .shadow-neu {
+    box-shadow: 14px 14px 28px var(--neu-shadow-dark), -14px -14px 28px var(--neu-shadow-light);
+  }
+  .shadow-neu-sm {
+    box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light);
+  }
+  .shadow-neu-inner {
+    box-shadow: inset 10px 10px 20px var(--neu-shadow-dark), inset -10px -10px 20px var(--neu-shadow-light);
   }
 }

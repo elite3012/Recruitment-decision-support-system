@@ -1,10 +1,32 @@
 import sys
 import os
+import json
 
 # Add backend to path so we can import from src
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
 from src.storage.database import Database
+
+
+def seed_from_demo_file(db: Database, demo_path: str) -> bool:
+    if not os.path.exists(demo_path):
+        return False
+
+    with open(demo_path, "r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+
+    db.reset_database()
+    for job in payload.get("jobs", []):
+        db.add_job(job)
+    for candidate in payload.get("candidates", []):
+        db.add_candidate(candidate)
+
+    print(
+        f"Database seeded from demo fixture: "
+        f"{len(payload.get('jobs', []))} jobs, {len(payload.get('candidates', []))} candidates."
+    )
+    return True
+
 
 def seed():
     # Use absolute path to data/app.db
@@ -12,6 +34,10 @@ def seed():
     os.makedirs(data_dir, exist_ok=True)
     db_path = os.path.join(data_dir, 'app.db')
     db = Database(db_path=db_path)
+
+    demo_path = os.path.join(data_dir, "demo_seed.json")
+    if seed_from_demo_file(db, demo_path):
+        return
     
     # 1. Clear existing data
     db.reset_database()

@@ -1,4 +1,6 @@
 from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -840,6 +842,20 @@ def delete_decision(action_id: int, current_user=Depends(get_current_user)):
     if not deleted:
         raise HTTPException(status_code=404, detail="Decision not found")
     return {"status": "success", "message": "Decision deleted"}
+
+
+frontend_dist = os.path.abspath(
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+)
+if os.path.isdir(frontend_dist):
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def serve_frontend(full_path: str):
+        static_file = os.path.join(frontend_dist, full_path)
+        if full_path and os.path.isfile(static_file):
+            return FileResponse(static_file)
+        return FileResponse(os.path.join(frontend_dist, "index.html"))
 
 
 if __name__ == "__main__":

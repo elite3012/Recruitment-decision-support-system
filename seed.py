@@ -8,7 +8,9 @@ from src.storage.database import Database
 
 def seed():
     # Use absolute path to data/app.db
-    db_path = os.path.join(os.path.dirname(__file__), 'data', 'app.db')
+    data_dir = os.path.join(os.path.dirname(__file__), 'data')
+    os.makedirs(data_dir, exist_ok=True)
+    db_path = os.path.join(data_dir, 'app.db')
     db = Database(db_path=db_path)
     
     # 1. Clear existing data

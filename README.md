@@ -46,7 +46,14 @@ For PowerShell environments:
 .\start.ps1
 ```
 
-This script activates the Python environment, boots the FastAPI backend on port `8000`, and starts the React development server on port `5173`.
+On a fresh clone, the script creates `.venv`, installs backend dependencies, seeds `data/app.db` if it does not exist, installs frontend dependencies, boots the FastAPI backend on port `8000`, and starts the React development server on port `5173`.
+
+Default login:
+
+```text
+Username: admin
+Password: admin123
+```
 
 ### Option 2: Manual Startup
 
@@ -55,10 +62,13 @@ If you prefer to start the services manually or are on a non-Windows machine:
 **Backend**
 ```bash
 cd backend
-python -m venv .venv
-source .venv/bin/activate  # Unix/Mac
-# .venv\Scripts\activate   # Windows
+python -m venv ../.venv
+source ../.venv/bin/activate  # Unix/Mac
+# ..\.venv\Scripts\activate   # Windows
 pip install -r requirements.txt
+cd ..
+python seed.py
+cd backend
 uvicorn main:app --reload --port 8000
 ```
 

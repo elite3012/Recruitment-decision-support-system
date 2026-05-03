@@ -46,7 +46,8 @@ frontend/node_modules/.vite/
 *.swo
 *~
 
-# Data (keep raw sample structure)
+# Local datasets / generated database
+# The app can be bootstrapped with seed.py, so large local CSV/DB files stay out of Git.
 data/raw/*.csv
 data/raw/*.xlsx
 data/processed/*.pkl

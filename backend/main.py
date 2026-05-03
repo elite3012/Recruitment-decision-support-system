@@ -300,13 +300,21 @@ def clear_candidate_cache(candidate_id: Optional[int] = None) -> None:
     if not matcher:
         return
 
+    if hasattr(matcher, "clear_candidate_cache"):
+        matcher.clear_candidate_cache(candidate_id)
+        return
+
     if candidate_id is None:
         matcher._cand_embeddings_cache.clear()
         matcher._cand_skills_cache.clear()
+        if hasattr(matcher, "_cand_feature_hash_cache"):
+            matcher._cand_feature_hash_cache.clear()
         return
 
     matcher._cand_embeddings_cache.pop(candidate_id, None)
     matcher._cand_skills_cache.pop(candidate_id, None)
+    if hasattr(matcher, "_cand_feature_hash_cache"):
+        matcher._cand_feature_hash_cache.pop(candidate_id, None)
 
 
 def validate_decision(decision: str) -> None:

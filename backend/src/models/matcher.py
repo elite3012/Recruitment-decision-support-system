@@ -1,5 +1,9 @@
 import numpy as np
 import re
+import base64
+import hashlib
+import json
+import os
 from typing import Dict, Tuple, List
 from src.models.embedder import EmbedderService
 from src.processing import normalize_text, extract_skills
@@ -37,6 +41,82 @@ class CandidateJobMatcher:
         self.embedder = embedder or EmbedderService()
         self._cand_embeddings_cache = {}
         self._cand_skills_cache = {}
+        self._cand_feature_hash_cache = {}
+        self._feature_cache_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "processed", "candidate_feature_cache.json")
+        )
+        self._persistent_feature_cache = self._load_feature_cache()
+
+    def _candidate_feature_hash(self, candidate: Dict) -> str:
+        raw_text = f"{str(candidate.get('desired_job') or '')}\0{str(candidate.get('skills') or '')}"
+        return hashlib.sha1(raw_text.encode("utf-8", errors="ignore")).hexdigest()
+
+    def _load_feature_cache(self) -> Dict:
+        if not os.path.exists(self._feature_cache_path):
+            return {}
+
+        try:
+            with open(self._feature_cache_path, "r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except Exception as exc:
+            logger.warning(f"Could not load candidate feature cache: {exc}")
+            return {}
+
+        if payload.get("model_name") != self.embedder.model_name:
+            return {}
+        if payload.get("embedding_dim") != self.embedder.embedding_dim:
+            return {}
+        return payload.get("candidates", {})
+
+    def _restore_candidate_feature(self, candidate_id: int, feature_hash: str) -> bool:
+        cached = self._persistent_feature_cache.get(str(candidate_id))
+        if not cached or cached.get("hash") != feature_hash:
+            return False
+
+        try:
+            embedding_bytes = base64.b64decode(cached["embedding"])
+            embedding = np.frombuffer(embedding_bytes, dtype=np.float32)
+            if embedding.size != self.embedder.embedding_dim:
+                return False
+            self._cand_embeddings_cache[candidate_id] = embedding
+            self._cand_skills_cache[candidate_id] = set(cached.get("skills", []))
+            self._cand_feature_hash_cache[candidate_id] = feature_hash
+            return True
+        except Exception as exc:
+            logger.warning(f"Could not restore cached candidate feature {candidate_id}: {exc}")
+            return False
+
+    def _persist_candidate_features(self, features: Dict[int, Dict]) -> None:
+        if not features:
+            return
+
+        self._persistent_feature_cache.update({str(candidate_id): data for candidate_id, data in features.items()})
+        payload = {
+            "version": 1,
+            "model_name": self.embedder.model_name,
+            "embedding_dim": self.embedder.embedding_dim,
+            "candidates": self._persistent_feature_cache,
+        }
+
+        try:
+            os.makedirs(os.path.dirname(self._feature_cache_path), exist_ok=True)
+            tmp_path = f"{self._feature_cache_path}.tmp"
+            with open(tmp_path, "w", encoding="utf-8") as handle:
+                json.dump(payload, handle, separators=(",", ":"))
+            os.replace(tmp_path, self._feature_cache_path)
+        except Exception as exc:
+            logger.warning(f"Could not write candidate feature cache: {exc}")
+
+    def clear_candidate_cache(self, candidate_id: int = None) -> None:
+        if candidate_id is None:
+            self._cand_embeddings_cache.clear()
+            self._cand_skills_cache.clear()
+            self._cand_feature_hash_cache.clear()
+            return
+
+        self._cand_embeddings_cache.pop(candidate_id, None)
+        self._cand_skills_cache.pop(candidate_id, None)
+        self._cand_feature_hash_cache.pop(candidate_id, None)
     
     def match(
         self,
@@ -235,21 +315,41 @@ class CandidateJobMatcher:
         cand_start = time.time()
         uncached_cands = []
         cand_texts = []
+        uncached_hashes = {}
         for c in candidates:
             cid = c.get('id')
-            if cid not in self._cand_embeddings_cache or cid not in self._cand_skills_cache:
-                uncached_cands.append(c)
-                skills_str = str(c.get('skills') or '')
-                raw_cand_skills = set(extract_skills(skills_str))
-                self._cand_skills_cache[cid] = {s.strip().lower() for s in raw_cand_skills if s.strip()}
-                cand_texts.append(normalize_text(f"{str(c.get('desired_job') or '')} {skills_str}"))
+            feature_hash = self._candidate_feature_hash(c)
+            has_memory_cache = (
+                cid in self._cand_embeddings_cache
+                and cid in self._cand_skills_cache
+                and self._cand_feature_hash_cache.get(cid) == feature_hash
+            )
+            if has_memory_cache or self._restore_candidate_feature(cid, feature_hash):
+                continue
+
+            uncached_cands.append(c)
+            uncached_hashes[cid] = feature_hash
+            skills_str = str(c.get('skills') or '')
+            raw_cand_skills = set(extract_skills(skills_str))
+            self._cand_skills_cache[cid] = {s.strip().lower() for s in raw_cand_skills if s.strip()}
+            self._cand_feature_hash_cache[cid] = feature_hash
+            cand_texts.append(normalize_text(f"{str(c.get('desired_job') or '')} {skills_str}"))
 
         if uncached_cands and cand_texts:
             logger.info(f"Computing embeddings and features for {len(uncached_cands)} uncached candidates...")
             try:
                 new_embs = self.embedder.embed(cand_texts, batch_size=128)
+                persistent_updates = {}
                 for c, emb in zip(uncached_cands, new_embs):
-                    self._cand_embeddings_cache[c.get('id')] = emb
+                    cid = c.get('id')
+                    emb32 = np.asarray(emb, dtype=np.float32)
+                    self._cand_embeddings_cache[cid] = emb32
+                    persistent_updates[cid] = {
+                        "hash": uncached_hashes.get(cid),
+                        "embedding": base64.b64encode(emb32.tobytes()).decode("ascii"),
+                        "skills": sorted(self._cand_skills_cache.get(cid, set())),
+                    }
+                self._persist_candidate_features(persistent_updates)
             except Exception as e:
                 logger.error(f"Batch candidate embedding failed: {e}")
                 for c in uncached_cands:

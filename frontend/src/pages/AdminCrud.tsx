@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Edit3, Plus, Search, Trash2, X } from 'lucide-react';
 import {
@@ -62,6 +62,8 @@ const tabLabels: Record<CrudTab, string> = {
   candidates: 'Candidates',
 };
 
+const PAGE_SIZE = 75;
+
 const toOptionalNumber = (value: unknown) => {
   if (value === '' || value === null || value === undefined) return undefined;
   const numeric = Number(value);
@@ -115,6 +117,8 @@ const AdminCrud = () => {
 
   const [activeTab, setActiveTab] = useState<CrudTab>('jobs');
   const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [formState, setFormState] = useState<Record<string, any>>(emptyJob);
@@ -164,14 +168,36 @@ const AdminCrud = () => {
     ],
   };
 
+  const searchableData = useMemo(() => {
+    return activeData.map((item: any) => ({
+      item,
+      searchText: Object.values(item)
+        .map((value) => String(value ?? '').toLowerCase())
+        .join(' '),
+    }));
+  }, [activeData]);
+
   const filteredData = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
+    const term = deferredSearchTerm.trim().toLowerCase();
     if (!term) return activeData;
 
-    return activeData.filter((item: any) =>
-      Object.values(item).some((value) => String(value ?? '').toLowerCase().includes(term))
-    );
-  }, [activeData, searchTerm]);
+    return searchableData
+      .filter((entry: { item: any; searchText: string }) => entry.searchText.includes(term))
+      .map((entry: { item: any; searchText: string }) => entry.item);
+  }, [activeData, searchableData, deferredSearchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, deferredSearchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pageStart = filteredData.length ? (safePage - 1) * PAGE_SIZE : 0;
+  const paginatedData = useMemo(
+    () => filteredData.slice(pageStart, pageStart + PAGE_SIZE),
+    [filteredData, pageStart]
+  );
+  const isSearchPending = searchTerm !== deferredSearchTerm;
 
   const invalidateWorkflow = async () => {
     await Promise.all([
@@ -221,6 +247,7 @@ const AdminCrud = () => {
       window.setTimeout(() => setFeedback(null), 2500);
     },
   });
+  const deleteItem = deleteMutation.mutate;
 
   const openCreate = () => {
     setEditingItem(null);
@@ -228,7 +255,7 @@ const AdminCrud = () => {
     setDrawerOpen(true);
   };
 
-  const openEdit = (item: any) => {
+  const openEdit = useCallback((item: any) => {
     setEditingItem(item);
     setFormState(
       activeTab === 'jobs'
@@ -236,17 +263,51 @@ const AdminCrud = () => {
         : normalizeCandidateForForm(item)
     );
     setDrawerOpen(true);
-  };
+  }, [activeTab]);
 
-  const handleDelete = (item: any) => {
+  const handleDelete = useCallback((item: any) => {
     const label =
       activeTab === 'jobs'
         ? item.title
         : item.name;
     if (window.confirm(`Delete ${label}? Related matches and decision records may be removed.`)) {
-      deleteMutation.mutate(item);
+      deleteItem(item);
     }
-  };
+  }, [activeTab, deleteItem]);
+
+  const renderedRows = useMemo(() => {
+    if (activeTab === 'jobs') {
+      return paginatedData.map((job: any) => (
+        <tr key={job.id} className="bg-neu-surface hover:shadow-neu-inner transition-all">
+          <td className="px-5 py-4 font-black text-neu-primary font-mono">#{job.id}</td>
+          <td className="px-5 py-4 font-black uppercase">{job.title || 'Untitled Job'}</td>
+          <td className="px-5 py-4 text-neu-text/60">{job.company_name || '-'}</td>
+          <td className="px-5 py-4 text-neu-text/60">{job.location || '-'}</td>
+          <td className="px-5 py-4 text-neu-text/60 max-w-xs truncate" title={job.skills}>{job.skills || '-'}</td>
+          <td className="px-5 py-4 text-right">
+            <RowActions onEdit={() => openEdit(job)} onDelete={() => handleDelete(job)} />
+          </td>
+        </tr>
+      ));
+    }
+
+    if (activeTab === 'candidates') {
+      return paginatedData.map((candidate: any) => (
+        <tr key={candidate.id} className="bg-neu-surface hover:shadow-neu-inner transition-all">
+          <td className="px-5 py-4 font-black text-neu-primary font-mono">#{candidate.id}</td>
+          <td className="px-5 py-4 font-black uppercase">{candidate.name || 'Unnamed Candidate'}</td>
+          <td className="px-5 py-4 text-neu-text/60">{candidate.title || '-'}</td>
+          <td className="px-5 py-4 text-neu-text/60">{candidate.location || '-'}</td>
+          <td className="px-5 py-4 text-neu-text/60 max-w-xs truncate" title={candidate.skills}>{candidate.skills || '-'}</td>
+          <td className="px-5 py-4 text-right">
+            <RowActions onEdit={() => openEdit(candidate)} onDelete={() => handleDelete(candidate)} />
+          </td>
+        </tr>
+      ));
+    }
+
+    return null;
+  }, [activeTab, paginatedData, openEdit, handleDelete]);
 
   const submitForm = (event: React.FormEvent) => {
     event.preventDefault();
@@ -300,40 +361,6 @@ const AdminCrud = () => {
     );
   };
 
-  const renderRows = () => {
-    if (activeTab === 'jobs') {
-      return filteredData.map((job: any) => (
-        <tr key={job.id} className="bg-neu-surface hover:shadow-neu-inner transition-all">
-          <td className="px-5 py-4 font-black text-neu-primary font-mono">#{job.id}</td>
-          <td className="px-5 py-4 font-black uppercase">{job.title || 'Untitled Job'}</td>
-          <td className="px-5 py-4 text-neu-text/60">{job.company_name || '-'}</td>
-          <td className="px-5 py-4 text-neu-text/60">{job.location || '-'}</td>
-          <td className="px-5 py-4 text-neu-text/60 max-w-xs truncate" title={job.skills}>{job.skills || '-'}</td>
-          <td className="px-5 py-4 text-right">
-            <RowActions onEdit={() => openEdit(job)} onDelete={() => handleDelete(job)} />
-          </td>
-        </tr>
-      ));
-    }
-
-    if (activeTab === 'candidates') {
-      return filteredData.map((candidate: any) => (
-        <tr key={candidate.id} className="bg-neu-surface hover:shadow-neu-inner transition-all">
-          <td className="px-5 py-4 font-black text-neu-primary font-mono">#{candidate.id}</td>
-          <td className="px-5 py-4 font-black uppercase">{candidate.name || 'Unnamed Candidate'}</td>
-          <td className="px-5 py-4 text-neu-text/60">{candidate.title || '-'}</td>
-          <td className="px-5 py-4 text-neu-text/60">{candidate.location || '-'}</td>
-          <td className="px-5 py-4 text-neu-text/60 max-w-xs truncate" title={candidate.skills}>{candidate.skills || '-'}</td>
-          <td className="px-5 py-4 text-right">
-            <RowActions onEdit={() => openEdit(candidate)} onDelete={() => handleDelete(candidate)} />
-          </td>
-        </tr>
-      ));
-    }
-
-    return null;
-  };
-
   const headers =
     activeTab === 'jobs'
       ? ['ID', 'Title', 'Company', 'Location', 'Skills', 'Actions']
@@ -363,6 +390,7 @@ const AdminCrud = () => {
               onClick={() => {
                 setActiveTab(tab);
                 setSearchTerm('');
+                setCurrentPage(1);
                 setDrawerOpen(false);
               }}
               className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
@@ -375,6 +403,11 @@ const AdminCrud = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="hidden xl:block text-[10px] font-black font-mono uppercase tracking-widest text-neu-text/40">
+            {isSearchPending
+              ? 'Filtering...'
+              : `${filteredData.length.toLocaleString()} records`}
+          </div>
           <div className="flex items-center gap-3 bg-neu-surface shadow-neu-inner rounded-xl px-4 py-3 min-w-[320px]">
             <Search className="w-4 h-4 text-neu-primary" />
             <input
@@ -400,22 +433,51 @@ const AdminCrud = () => {
         ) : isError ? (
           <div className="p-10 text-neu-danger font-bold">Failed to load CRUD data.</div>
         ) : (
-          <div className="overflow-auto h-full">
-            <table className="w-full text-left text-sm">
-              <thead className="sticky top-0 bg-neu-surface z-10 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase font-mono shadow-sm">
-                <tr>
-                  {headers.map((header) => (
-                    <th key={header} className={`px-5 py-4 ${header === 'Actions' ? 'text-right' : ''}`}>
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>{renderRows()}</tbody>
-            </table>
-            {!filteredData.length && (
-              <div className="p-12 text-center text-neu-text/40 font-bold">No records found.</div>
-            )}
+          <div className="h-full flex flex-col">
+            <div className="overflow-auto flex-1 min-h-0">
+              <table className="w-full text-left text-sm">
+                <thead className="sticky top-0 bg-neu-surface z-10 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase font-mono shadow-sm">
+                  <tr>
+                    {headers.map((header) => (
+                      <th key={header} className={`px-5 py-4 ${header === 'Actions' ? 'text-right' : ''}`}>
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>{renderedRows}</tbody>
+              </table>
+              {!filteredData.length && (
+                <div className="p-12 text-center text-neu-text/40 font-bold">No records found.</div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-300/60 px-5 py-3 bg-neu-surface">
+              <div className="text-[10px] font-black font-mono uppercase tracking-widest text-neu-text/45">
+                Showing {filteredData.length ? pageStart + 1 : 0}-{Math.min(pageStart + PAGE_SIZE, filteredData.length)} of {filteredData.length.toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(Math.max(1, safePage - 1))}
+                  disabled={safePage <= 1}
+                  className="px-4 py-2 rounded-xl bg-neu-surface shadow-neu-sm disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neu-text"
+                >
+                  Prev
+                </button>
+                <span className="min-w-24 text-center text-[10px] font-black font-mono uppercase tracking-widest text-neu-text/45">
+                  Page {safePage} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))}
+                  disabled={safePage >= totalPages}
+                  className="px-4 py-2 rounded-xl bg-neu-surface shadow-neu-sm disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neu-text"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

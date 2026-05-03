@@ -193,6 +193,16 @@ VIETNAMESE_REQUIREMENTS_COMMON = {
     'dịch vụ khách hàng', 'tiếp thị', 'marketing', 'quan hệ khách hàng',
 }
 
+_SKILL_ALIAS_PATTERNS = [
+    (alias, canonical, re.compile(r'\b' + re.escape(alias) + r'\b'))
+    for alias, canonical in sorted(SKILL_ALIASES.items(), key=lambda x: len(x[0]), reverse=True)
+]
+
+_COMMON_SKILL_PATTERNS = [
+    (skill, re.compile(r'\b' + re.escape(skill) + r'\b'))
+    for skill in sorted(COMMON_SKILLS, key=len, reverse=True)
+]
+
 # ============================================================================
 # TEXT NORMALIZATION FUNCTIONS
 # ============================================================================
@@ -301,26 +311,25 @@ def extract_skills(text: str, custom_skills: Set[str] = None) -> List[str]:
     if not text:
         return []
     
-    found_skills = set()
     text_lower = str(text).lower()
+    found_skills = set()
     
-    # Build complete English skill set including aliases
-    all_skills = COMMON_SKILLS.copy()
-    if custom_skills:
-        all_skills.update(custom_skills)
-    
-    # Extract English skills  
+    # Extract English skills
     # First pass: Check skill aliases (longer aliases first to avoid partial matches)
-    for alias, canonical in sorted(SKILL_ALIASES.items(), key=lambda x: len(x[0]), reverse=True):
-        pattern = r'\b' + re.escape(alias) + r'\b'
-        if re.search(pattern, text_lower):
+    for alias, canonical, pattern in _SKILL_ALIAS_PATTERNS:
+        if alias in text_lower and pattern.search(text_lower):
             found_skills.add(canonical)
     
     # Second pass: Check direct skills (longer skills first to catch compound skills)
-    for skill in sorted(all_skills, key=len, reverse=True):
-        pattern = r'\b' + re.escape(skill) + r'\b'
-        if re.search(pattern, text_lower):
+    for skill, pattern in _COMMON_SKILL_PATTERNS:
+        if skill in text_lower and pattern.search(text_lower):
             found_skills.add(skill)
+
+    if custom_skills:
+        for skill in sorted(set(custom_skills) - COMMON_SKILLS, key=len, reverse=True):
+            skill = str(skill).lower()
+            if skill and skill in text_lower and re.search(r'\b' + re.escape(skill) + r'\b', text_lower):
+                found_skills.add(skill)
     
     # Extract Vietnamese skills if text contains Vietnamese
     if is_vietnamese_text(text):

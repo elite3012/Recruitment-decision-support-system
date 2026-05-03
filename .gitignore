@@ -52,6 +52,8 @@ data/raw/*.csv
 data/raw/*.xlsx
 data/processed/*.pkl
 data/processed/*.csv
+data/processed/*.json
+data/processed/*.tmp
 
 # Database
 *.db

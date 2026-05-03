@@ -44,7 +44,7 @@ const DecisionHistoryTable: React.FC<DecisionHistoryTableProps> = ({ decisions }
                     </span>
                   </div>
                 </td>
-                <td className="p-4 px-6 text-slate-500">Admin</td>
+                <td className="p-4 px-6 text-slate-500">{decision.recruiter_name || 'Admin'}</td>
                 <td className="p-4 px-6">
                   <span className={`px-3 py-1 text-[10px] leading-none uppercase font-bold tracking-wider rounded-md shadow-neu-inner ${isRejected ? 'bg-neu-surface text-slate-500' : isShortlisted ? 'bg-neu-surface text-neu-success' : 'bg-neu-surface text-neu-warning'}`}>
                     {action}

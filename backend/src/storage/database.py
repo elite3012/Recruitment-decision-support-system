@@ -4,7 +4,7 @@ Database access layer
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from config.settings import DATABASE_PATH
-from src.storage.models import Base, Job, Candidate, Match, RecruiterAction
+from src.storage.models import Base, Job, Candidate, Match, RecruiterAction, User
 from src.utils.logging import setup_logging
 from typing import List, Optional
 
@@ -67,6 +67,45 @@ class Database:
             return session.query(Job).all()
         finally:
             session.close()
+
+    def update_job(self, job_id: int, job_data: dict) -> Optional[Job]:
+        """Update a job by ID"""
+        session = self.get_session()
+        try:
+            job = session.query(Job).filter(Job.job_id == job_id).first()
+            if not job:
+                return None
+
+            for key, value in job_data.items():
+                if hasattr(job, key):
+                    setattr(job, key, value)
+
+            session.commit()
+            return job
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error updating job {job_id}: {e}")
+            raise
+        finally:
+            session.close()
+
+    def delete_job(self, job_id: int) -> bool:
+        """Delete a job and related matches/actions"""
+        session = self.get_session()
+        try:
+            job = session.query(Job).filter(Job.job_id == job_id).first()
+            if not job:
+                return False
+
+            session.delete(job)
+            session.commit()
+            return True
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error deleting job {job_id}: {e}")
+            raise
+        finally:
+            session.close()
     
     def delete_all_jobs(self):
         """Delete all jobs"""
@@ -113,6 +152,45 @@ class Database:
         session = self.get_session()
         try:
             return session.query(Candidate).all()
+        finally:
+            session.close()
+
+    def update_candidate(self, user_id: int, candidate_data: dict) -> Optional[Candidate]:
+        """Update a candidate by ID"""
+        session = self.get_session()
+        try:
+            candidate = session.query(Candidate).filter(Candidate.user_id == user_id).first()
+            if not candidate:
+                return None
+
+            for key, value in candidate_data.items():
+                if hasattr(candidate, key):
+                    setattr(candidate, key, value)
+
+            session.commit()
+            return candidate
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error updating candidate {user_id}: {e}")
+            raise
+        finally:
+            session.close()
+
+    def delete_candidate(self, user_id: int) -> bool:
+        """Delete a candidate and related matches/actions"""
+        session = self.get_session()
+        try:
+            candidate = session.query(Candidate).filter(Candidate.user_id == user_id).first()
+            if not candidate:
+                return False
+
+            session.delete(candidate)
+            session.commit()
+            return True
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error deleting candidate {user_id}: {e}")
+            raise
         finally:
             session.close()
     
@@ -239,6 +317,59 @@ class Database:
             return session.query(RecruiterAction).all()
         finally:
             session.close()
+
+    def get_recruiter_action(self, action_id: int) -> Optional[RecruiterAction]:
+        """Get recruiter action by ID"""
+        session = self.get_session()
+        try:
+            return session.query(RecruiterAction).filter(
+                RecruiterAction.action_id == action_id
+            ).first()
+        finally:
+            session.close()
+
+    def update_recruiter_action(self, action_id: int, action_data: dict) -> Optional[RecruiterAction]:
+        """Update recruiter action by ID"""
+        session = self.get_session()
+        try:
+            action = session.query(RecruiterAction).filter(
+                RecruiterAction.action_id == action_id
+            ).first()
+            if not action:
+                return None
+
+            for key, value in action_data.items():
+                if hasattr(action, key):
+                    setattr(action, key, value)
+
+            session.commit()
+            return action
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error updating recruiter action {action_id}: {e}")
+            raise
+        finally:
+            session.close()
+
+    def delete_recruiter_action(self, action_id: int) -> bool:
+        """Delete recruiter action by ID"""
+        session = self.get_session()
+        try:
+            action = session.query(RecruiterAction).filter(
+                RecruiterAction.action_id == action_id
+            ).first()
+            if not action:
+                return False
+
+            session.delete(action)
+            session.commit()
+            return True
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error deleting recruiter action {action_id}: {e}")
+            raise
+        finally:
+            session.close()
     
     def delete_all_recruiter_actions(self):
         """Delete all recruiter actions"""
@@ -263,5 +394,58 @@ class Database:
             session.query(Candidate).delete()
             session.commit()
             logger.info("Database reset successfully")
+        finally:
+            session.close()
+
+    # ======================================================================
+    # USER / AUTH OPERATIONS
+    # ======================================================================
+
+    def add_user(self, user_data: dict) -> User:
+        """Add system user"""
+        session = self.get_session()
+        try:
+            user = User(**user_data)
+            session.add(user)
+            session.commit()
+            return user
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error adding user: {e}")
+            raise
+        finally:
+            session.close()
+
+    def get_user_by_username(self, username: str) -> Optional[User]:
+        """Get user by username"""
+        session = self.get_session()
+        try:
+            return session.query(User).filter(User.username == username).first()
+        finally:
+            session.close()
+
+    def get_user_by_id(self, user_id: int) -> Optional[User]:
+        """Get user by ID"""
+        session = self.get_session()
+        try:
+            return session.query(User).filter(User.user_id == user_id).first()
+        finally:
+            session.close()
+
+    def update_user_password(self, user_id: int, password_hash: str) -> Optional[User]:
+        """Update a user's password hash"""
+        session = self.get_session()
+        try:
+            user = session.query(User).filter(User.user_id == user_id).first()
+            if not user:
+                return None
+
+            user.password_hash = password_hash
+            session.commit()
+            return user
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error updating password for user {user_id}: {e}")
+            raise
         finally:
             session.close()

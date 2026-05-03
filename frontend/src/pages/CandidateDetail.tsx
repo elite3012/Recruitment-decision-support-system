@@ -104,7 +104,7 @@ const CandidateDetail = () => {
   };
 
   if (!selectedJobId) {
-    return <div className="p-8 text-slate-500">No Job Context Found. Retrun to Jobs Page.</div>;
+    return <div className="p-8 text-slate-500">No Job Context Found. Return to Jobs Page.</div>;
   }
   
   if (isLoading) return <div className="p-8 text-slate-500 animate-pulse">Loading Candidate Profile & ML Explanation...</div>;

@@ -111,3 +111,18 @@ class RecruiterAction(Base):
     
     def __repr__(self):
         return f"<RecruiterAction(decision='{self.decision}', user={self.user_id})>"
+
+class User(Base):
+    """System user for authenticated HR/admin workflows"""
+    __tablename__ = 'users'
+
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(100), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    full_name = Column(String(255))
+    role = Column(String(50), default='admin')
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<User(id={self.user_id}, username='{self.username}')>"

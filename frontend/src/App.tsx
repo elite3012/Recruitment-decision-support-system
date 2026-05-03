@@ -1,10 +1,16 @@
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Home, Briefcase, Filter, Users, Settings, History } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Briefcase, Database, Filter, History, Home, LogOut, Settings } from 'lucide-react';
+import { AUTH_TOKEN_KEY, getMe } from './api/client';
 import Dashboard from './pages/Dashboard';
 import JobSelection from './pages/JobSelection';
 import CandidateRanking from './pages/CandidateRanking';
 import CandidateDetail from './pages/CandidateDetail';
 import DecisionHistory from './pages/DecisionHistory';
+import AdminCrud from './pages/AdminCrud';
+import Login from './pages/Login';
+import AccountSettings from './pages/AccountSettings';
 
 const NavLink = ({ to, icon: Icon, children }: { to: string, icon: any, children: React.ReactNode }) => {
   const location = useLocation();
@@ -25,7 +31,7 @@ const NavLink = ({ to, icon: Icon, children }: { to: string, icon: any, children
   );
 };
 
-function AppContent() {
+function AppContent({ user, onLogout }: { user: any; onLogout: () => void }) {
   return (
     <div className="flex h-screen overflow-hidden bg-neu-surface font-primary text-neu-text">
       {/* Sidebar Navigation */}
@@ -41,6 +47,8 @@ function AppContent() {
           <NavLink to="/jobs" icon={Briefcase}>Job Catalog</NavLink>
           <NavLink to="/ranking" icon={Filter}>Candidates</NavLink>
           <NavLink to="/decisions" icon={History}>History</NavLink>
+          <NavLink to="/admin" icon={Database}>Master Data</NavLink>
+          <NavLink to="/account" icon={Settings}>Account</NavLink>
         </nav>
         <div className="p-6 m-4 bg-teal-900/10 border border-teal-500/20 rounded-2xl text-[9px] uppercase font-black tracking-[0.3em] text-teal-600/60 text-center font-mono">
            Enterprise Edition v2
@@ -55,7 +63,14 @@ function AppContent() {
           </div>
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 bg-white shadow-neu-sm rounded-full" />
-             <span className="text-[10px] font-black font-mono text-neu-primary">ROOT_ADMIN</span>
+             <span className="text-[10px] font-black font-mono text-neu-primary uppercase">{user?.username || 'ADMIN'}</span>
+             <button
+               onClick={onLogout}
+               className="w-9 h-9 rounded-xl bg-neu-surface shadow-neu-sm text-neu-text/50 hover:text-neu-danger flex items-center justify-center transition"
+               title="Logout"
+             >
+               <LogOut className="w-4 h-4" />
+             </button>
           </div>
         </header>
         
@@ -66,6 +81,8 @@ function AppContent() {
             <Route path="/ranking" element={<CandidateRanking />} />
             <Route path="/candidate/:id" element={<CandidateDetail />} />
             <Route path="/decisions" element={<DecisionHistory />} />
+            <Route path="/admin" element={<AdminCrud />} />
+            <Route path="/account" element={<AccountSettings user={user} />} />
           </Routes>
         </div>
       </main>
@@ -74,9 +91,45 @@ function AppContent() {
 }
 
 function App() {
+  const queryClient = useQueryClient();
+  const [token, setToken] = useState(() => localStorage.getItem(AUTH_TOKEN_KEY));
+
+  const authQuery = useQuery({
+    queryKey: ['authMe', token],
+    queryFn: getMe,
+    enabled: !!token,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (authQuery.isError) {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      setToken(null);
+    }
+  }, [authQuery.isError]);
+
+  const handleLogin = (newToken: string) => {
+    localStorage.setItem(AUTH_TOKEN_KEY, newToken);
+    setToken(newToken);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    setToken(null);
+    queryClient.clear();
+  };
+
+  if (!token) {
+    return <Login onLogin={handleLogin} />;
+  }
+
+  if (authQuery.isLoading) {
+    return <div className="min-h-screen bg-neu-secondary p-10 text-neu-text/50 font-bold animate-pulse">Restoring secure session...</div>;
+  }
+
   return (
     <Router>
-      <AppContent />
+      <AppContent user={authQuery.data} onLogout={handleLogout} />
     </Router>
   );
 }

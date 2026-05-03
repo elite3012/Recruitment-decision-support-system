@@ -1,3 +1,16 @@
+---
+title: RecruitAI
+emoji: 🐢
+colorFrom: indigo
+colorTo: red
+sdk: docker
+pinned: false
+license: mit
+short_description: Decision Support System
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+
 # Recruitment Decision Support System
 
 A production-grade, AI-powered recruitment platform using semantic matching for candidate evaluation and recruiter decision workflows.

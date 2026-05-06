@@ -1,33 +1,39 @@
-import React from 'react';
+import React from "react";
 
 interface CandidateTabsProps {
-  activeTab: 'summary' | 'profile';
-  setActiveTab: (tab: 'summary' | 'profile') => void;
+  activeTab: "summary" | "profile";
+  setActiveTab: (tab: "summary" | "profile") => void;
 }
 
-const CandidateTabs: React.FC<CandidateTabsProps> = ({ activeTab, setActiveTab }) => {
+const CandidateTabs: React.FC<CandidateTabsProps> = ({
+  activeTab,
+  setActiveTab,
+}) => {
   return (
-    <div className="flex mb-6">
-      <nav className="flex space-x-2 p-1 bg-neu-surface shadow-neu-inner rounded-lg" aria-label="Tabs">
+    <div className="mb-6 overflow-x-auto pb-1">
+      <nav
+        className="flex min-w-max gap-2 rounded-2xl bg-neu-surface p-1.5 shadow-neu-inner"
+        aria-label="Tabs"
+      >
         <button
-          onClick={() => setActiveTab('summary')}
-          className={`whitespace-nowrap py-2 px-4 rounded-md font-bold text-sm transition-all ${
-            activeTab === 'summary'
-              ? 'bg-neu-surface shadow-neu text-neu-primary'
-              : 'text-slate-500 hover:text-neu-text'
+          onClick={() => setActiveTab("summary")}
+          className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+            activeTab === "summary"
+              ? "bg-neu-surface text-neu-primary shadow-neu"
+              : "text-neu-text/50 hover:text-neu-text"
           }`}
         >
-          Recruiter Match Summary
+          Match summary
         </button>
         <button
-          onClick={() => setActiveTab('profile')}
-          className={`whitespace-nowrap py-2 px-4 rounded-md font-bold text-sm transition-all ${
-            activeTab === 'profile'
-              ? 'bg-neu-surface shadow-neu text-neu-primary'
-              : 'text-slate-500 hover:text-neu-text'
+          onClick={() => setActiveTab("profile")}
+          className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+            activeTab === "profile"
+              ? "bg-neu-surface text-neu-primary shadow-neu"
+              : "text-neu-text/50 hover:text-neu-text"
           }`}
         >
-          Full Candidate Profile
+          Full profile
         </button>
       </nav>
     </div>

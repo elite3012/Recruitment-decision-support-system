@@ -1,33 +1,88 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@400;500;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --neu-surface: #DDE1E4;
-    --neu-secondary: #E2E8F0;
-    --neu-primary: #0D9488;
-    --neu-text: #1E2938;
+    --neu-surface: #dde1e4;
+    --neu-secondary: #e2e8f0;
+    --neu-primary: #0d9488;
+    --neu-text: #1e2938;
     --neu-shadow-dark: #b8bcc0;
     --neu-shadow-light: #ffffff;
   }
 
   body {
     @apply antialiased;
-    background-color: var(--neu-surface);
+    background:
+      radial-gradient(
+        circle at top left,
+        rgb(13 148 136 / 0.12),
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at bottom right,
+        rgb(14 116 144 / 0.1),
+        transparent 24%
+      ),
+      linear-gradient(180deg, #eef2f5 0%, #dfe4e8 100%);
     color: var(--neu-text);
-    font-family: 'Space Mono', monospace;
+    font-family: "Space Grotesk", sans-serif;
+    min-height: 100vh;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  html,
+  #root {
+    min-height: 100%;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(30 41 56 / 0.24) transparent;
+  }
+
+  *::selection {
+    background: rgb(13 148 136 / 0.18);
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
   }
 }
 
 @layer components {
+  .eyebrow {
+    @apply font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/45;
+  }
+
+  .table-shell {
+    @apply overflow-x-auto;
+  }
+
+  .table-shell table {
+    @apply min-w-[680px];
+  }
+
   .shadow-neu {
-    box-shadow: 14px 14px 28px var(--neu-shadow-dark), -14px -14px 28px var(--neu-shadow-light);
+    box-shadow:
+      14px 14px 28px var(--neu-shadow-dark),
+      -14px -14px 28px var(--neu-shadow-light);
   }
   .shadow-neu-sm {
-    box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light);
+    box-shadow:
+      6px 6px 12px var(--neu-shadow-dark),
+      -6px -6px 12px var(--neu-shadow-light);
   }
   .shadow-neu-inner {
-    box-shadow: inset 10px 10px 20px var(--neu-shadow-dark), inset -10px -10px 20px var(--neu-shadow-light);
+    box-shadow:
+      inset 10px 10px 20px var(--neu-shadow-dark),
+      inset -10px -10px 20px var(--neu-shadow-light);
   }
 }

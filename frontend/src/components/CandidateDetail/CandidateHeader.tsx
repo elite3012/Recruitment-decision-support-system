@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface CandidateHeaderProps {
   id?: string;
@@ -23,52 +23,67 @@ const CandidateHeader: React.FC<CandidateHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <>
-      <button onClick={() => navigate('/ranking')} className="text-sm font-medium text-neu-text hover:text-neu-primary flex items-center gap-2 mb-4 transition">Back to Ranking</button>
-      
-      <div className="flex justify-between items-start">
+    <div className="space-y-4">
+      <button
+        onClick={() => navigate("/ranking")}
+        className="inline-flex items-center gap-2 text-sm font-semibold text-neu-text/65 transition hover:text-neu-primary"
+      >
+        Back to ranking
+      </button>
+
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-bold tracking-tight text-neu-text">{candidateName || `Candidate #${id}`}</h2>
-          <p className="text-sm text-slate-500">Evaluation against Job Request <span className="font-mono">#{selectedJobId}</span> - {jobTitle || 'Unknown Title'}</p>
+          <p className="eyebrow">Candidate review</p>
+          <h2 className="text-2xl font-black tracking-tight text-neu-text sm:text-3xl">
+            {candidateName || `Candidate #${id}`}
+          </h2>
+          <p className="text-sm leading-6 text-neu-text/55 sm:text-base">
+            Evaluation against job request{" "}
+            <span className="font-mono">#{selectedJobId}</span> for{" "}
+            {jobTitle || "Unknown title"}.
+          </p>
         </div>
-        
-        <div className="flex gap-4">
-          <button 
-            onClick={() => handleDecision('Hold')}
-            className={`px-6 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 shadow-neu ${
-              decision === 'Hold' 
-                ? 'bg-[#FE9900] text-white' 
-                : 'bg-neu-surface text-neu-text hover:bg-[#FE9900] hover:text-white'
-            }`}>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => handleDecision("Hold")}
+            className={`rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-300 shadow-neu-sm ${
+              decision === "Hold"
+                ? "bg-[#FE9900] text-white"
+                : "bg-neu-surface text-neu-text hover:bg-[#FE9900] hover:text-white"
+            }`}
+          >
             Hold
           </button>
-          <button 
-            onClick={() => handleDecision('Reject')}
-            className={`px-6 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 shadow-neu ${
-              decision === 'Reject' 
-                ? 'bg-[#FF2157] text-white' 
-                : 'bg-neu-surface text-neu-text hover:bg-[#FF2157] hover:text-white'
-            }`}>
+          <button
+            onClick={() => handleDecision("Reject")}
+            className={`rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-300 shadow-neu-sm ${
+              decision === "Reject"
+                ? "bg-[#FF2157] text-white"
+                : "bg-neu-surface text-neu-text hover:bg-[#FF2157] hover:text-white"
+            }`}
+          >
             Reject
           </button>
-          <button 
-            onClick={() => handleDecision('Shortlist')}
-            className={`px-6 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 shadow-neu ${
-              decision === 'Shortlist' 
-                ? 'bg-[#00A63D] text-white' 
-                : 'bg-neu-surface text-neu-text hover:bg-[#00A63D] hover:text-white'
-            }`}>
+          <button
+            onClick={() => handleDecision("Shortlist")}
+            className={`rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-300 shadow-neu-sm ${
+              decision === "Shortlist"
+                ? "bg-[#00A63D] text-white"
+                : "bg-neu-surface text-neu-text hover:bg-[#00A63D] hover:text-white"
+            }`}
+          >
             Shortlist
           </button>
         </div>
       </div>
 
       {successMessage && (
-        <div className="bg-neu-surface shadow-neu-inner text-neu-success font-bold px-4 py-3 rounded-lg flex items-center">
+        <div className="flex items-center rounded-2xl bg-neu-surface px-4 py-3 font-semibold text-neu-success shadow-neu-inner">
           {successMessage}
         </div>
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,77 +1,133 @@
-import React from 'react';
+import React from "react";
 
 interface RankingTableProps {
   data: any;
   handleSelectCandidate: (id: number) => void;
 }
 
-const RankingTable: React.FC<RankingTableProps> = ({ data, handleSelectCandidate }) => {
+const RankingTable: React.FC<RankingTableProps> = ({
+  data,
+  handleSelectCandidate,
+}) => {
   return (
-    <div className="bg-neu-surface border-none text-sm rounded-2xl overflow-hidden shadow-neu flex-1">
-      <table className="w-full text-left">
-        <thead className="bg-neu-surface border-b-2 border-neu-surface shadow-sm text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase font-mono">
-          <tr>
-            <th className="p-4 px-6">RANK</th>
-            <th className="p-4 px-6">CANDIDATE</th>
-            <th className="p-4 px-6">ROLE</th>
-            <th className="p-4 px-6">LOCATION</th>
-            <th className="p-4 px-6">MATCH</th>
-            <th className="p-4 px-6 text-right">ACTION</th>
-          </tr>
-        </thead>
-        <tbody className="space-y-2">
-          {data?.ranking?.map((candidate: any, idx: number) => {
-            const decision = candidate.decision;
-            const isRejected = decision === 'Reject';
-            const isShortlisted = decision === 'Shortlist';
-            const isHold = decision === 'Hold';
-            
-            return (
-              <tr key={candidate.candidate_id} className={`border-b-2 border-transparent transition-all hover:shadow-neu-inner bg-neu-surface ${isRejected ? 'opacity-40' : ''}`}>
-                <td className="p-4 px-6 font-black text-neu-primary font-mono text-xl italic">
-                   {idx + 1}
-                </td>
-                <td className={`p-4 px-6 font-black ${isRejected ? 'text-slate-400' : 'text-neu-text'}`}>
-                  <div className="flex flex-col items-start gap-0.5">
-                    <div className="flex items-center gap-3">
-                       <span className={`text-base uppercase tracking-tight font-primary ${isRejected ? 'line-through' : ''}`}>{candidate.name || `Candidate ${candidate.candidate_id}`}</span>
-                       {decision && (
-                         <span className={`px-3 py-1 text-[8px] leading-none uppercase font-black tracking-[0.2em] rounded shadow-lg font-mono text-white ${
-                           isShortlisted ? 'bg-[#00A63D]' : 
-                           isRejected ? 'bg-[#FF2157]' : 
-                           'bg-[#FE9900]'
-                         }`}>
-                           {decision}
-                         </span>
-                       )}
-                    </div>
-                    <span className="text-[9px] text-neu-text/30 font-bold uppercase tracking-widest font-mono">CANDIDATE_ID: {candidate.candidate_id}</span>
-                  </div>
-                </td>
-                <td className="p-4 px-6 text-neu-text/60 font-bold text-xs uppercase tracking-tight font-mono">{candidate.title || 'N/A'}</td>
-                <td className="p-4 px-6 text-neu-text/40 font-bold text-xs uppercase font-mono">{candidate.location || 'N/A'}</td>
-                <td className="p-4 px-6">
-                  <div className="w-12 h-12 bg-neu-surface shadow-neu-inner rounded-full flex items-center justify-center">
-                    <span className={`font-black font-mono text-xs ${
-                      candidate.scores.overall_score >= 0.7 ? 'text-neu-success' : 
-                      candidate.scores.overall_score >= 0.4 ? 'text-neu-warning' : 
-                      'text-neu-danger'
-                    }`}>
-                      {Math.round(candidate.scores.overall_score * 100)}%
+    <div className="flex-1 overflow-hidden rounded-[28px] bg-neu-surface text-sm shadow-neu">
+      <div className="table-shell h-full">
+        <table className="w-full text-left">
+          <thead className="border-b-2 border-neu-surface bg-neu-surface text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/40">
+            <tr>
+              <th className="px-4 py-4 sm:px-6">Rank</th>
+              <th className="px-4 py-4 sm:px-6">Candidate</th>
+              <th className="hidden px-4 py-4 sm:table-cell sm:px-6">Role</th>
+              <th className="hidden px-4 py-4 xl:table-cell xl:px-6">
+                Location
+              </th>
+              <th className="px-4 py-4 sm:px-6">Match</th>
+              <th className="px-4 py-4 text-right sm:px-6">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.ranking?.map((candidate: any, idx: number) => {
+              const decision = candidate.decision;
+              const isRejected = decision === "Reject";
+              const isShortlisted = decision === "Shortlist";
+              const isHold = decision === "Hold";
+
+              return (
+                <tr
+                  key={candidate.candidate_id}
+                  className={`border-b border-white/35 bg-neu-surface transition-all hover:shadow-neu-inner ${isRejected ? "opacity-55" : ""}`}
+                >
+                  <td className="px-4 py-5 sm:px-6">
+                    <span className="text-2xl font-black italic text-neu-primary">
+                      {idx + 1}
                     </span>
-                  </div>
-                </td>
-                <td className="p-4 px-6 text-right">
-                  <button onClick={() => handleSelectCandidate(candidate.candidate_id)} className="px-6 py-2 text-[10px] font-black bg-neu-secondary text-neu-primary shadow-neu hover:bg-[#0D9488] hover:text-white active:scale-95 active:bg-[#0F766E] rounded-2xl transition-all duration-300 uppercase tracking-widest font-mono">ANALYZE</button>
-                </td>
-              </tr>
-            )})}
-        </tbody>
-      </table>
-      
-      {!data?.ranking?.length && (
-         <div className="text-center p-12 text-slate-500">No candidates matched the criteria.</div>
-      )}
+                  </td>
+                  <td
+                    className={`px-4 py-5 sm:px-6 ${isRejected ? "text-neu-text/55" : "text-neu-text"}`}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`text-sm font-bold sm:text-base ${isRejected ? "line-through" : ""}`}
+                        >
+                          {candidate.name ||
+                            `Candidate ${candidate.candidate_id}`}
+                        </span>
+                        {decision && (
+                          <span
+                            className={`rounded-full px-3 py-1 text-[11px] font-semibold text-white ${
+                              isShortlisted
+                                ? "bg-[#00A63D]"
+                                : isRejected
+                                  ? "bg-[#FF2157]"
+                                  : isHold
+                                    ? "bg-[#FE9900]"
+                                    : "bg-neu-primary"
+                            }`}
+                          >
+                            {decision}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-neu-text/45">
+                        ID #{candidate.candidate_id}
+                      </span>
+                      <span className="text-sm text-neu-text/55 sm:hidden">
+                        {candidate.title || "No role specified"}
+                      </span>
+                      <span className="text-sm text-neu-text/45 xl:hidden">
+                        {candidate.location || "Location not set"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="hidden px-4 py-5 text-sm font-medium text-neu-text/60 sm:table-cell sm:px-6">
+                    {candidate.title || "N/A"}
+                  </td>
+                  <td className="hidden px-4 py-5 text-sm font-medium text-neu-text/50 xl:table-cell xl:px-6">
+                    {candidate.location || "N/A"}
+                  </td>
+                  <td className="px-4 py-5 sm:px-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neu-surface shadow-neu-inner sm:h-14 sm:w-14">
+                      <span
+                        className={`text-sm font-black ${
+                          candidate.scores.overall_score >= 0.7
+                            ? "text-neu-success"
+                            : candidate.scores.overall_score >= 0.4
+                              ? "text-neu-warning"
+                              : "text-neu-danger"
+                        }`}
+                      >
+                        {Math.round(candidate.scores.overall_score * 100)}%
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-5 text-right sm:px-6">
+                    <button
+                      onClick={() =>
+                        handleSelectCandidate(candidate.candidate_id)
+                      }
+                      className="rounded-2xl bg-neu-secondary px-4 py-2.5 text-sm font-semibold text-neu-primary shadow-neu-sm transition-all duration-300 hover:bg-[#0D9488] hover:text-white active:scale-95 active:bg-[#0F766E] sm:px-5"
+                    >
+                      Review
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        {!data?.ranking?.length && (
+          <div className="p-12 text-center">
+            <p className="text-lg font-bold text-neu-text">
+              No candidates matched the criteria.
+            </p>
+            <p className="mt-2 text-sm text-neu-text/45">
+              Adjust the role requirements or pick a different job to continue.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import React from "react";
+import { LucideIcon } from "lucide-react";
 
 interface DashboardKPICardProps {
   title: string;
@@ -9,19 +9,31 @@ interface DashboardKPICardProps {
   iconBgClass: string;
 }
 
-const DashboardKPICard: React.FC<DashboardKPICardProps> = ({ title, value, icon: Icon, iconColorClass, iconBgClass }) => {
+const DashboardKPICard: React.FC<DashboardKPICardProps> = ({
+  title,
+  value,
+  icon: Icon,
+  iconColorClass,
+  iconBgClass,
+}) => {
   return (
-    <div className="bg-neu-surface rounded-3xl p-8 shadow-neu transition-all duration-300 hover:shadow-neu-sm cursor-default flex items-center justify-between border-b-4 border-transparent hover:border-neu-primary group">
-      <div>
-        <p className="text-[10px] font-black text-neu-text/40 uppercase tracking-[0.2em] font-mono mb-2">{title}</p>
-        <p className="text-4xl font-black font-primary text-neu-text tracking-tighter">{value}</p>
+    <div className="group flex items-center justify-between rounded-[28px] bg-neu-surface p-6 shadow-neu transition-all duration-300 hover:shadow-neu-sm sm:p-7">
+      <div className="min-w-0">
+        <p className="mb-2 text-sm font-semibold text-neu-text/55">{title}</p>
+        <p className="truncate text-3xl font-black tracking-tight text-neu-text sm:text-4xl">
+          {value}
+        </p>
       </div>
-      <div className={`p-5 rounded-2xl shadow-neu-inner transition-all duration-300 ${
-        title.toLowerCase().includes('job') ? 'text-neu-primary' : 
-        title.toLowerCase().includes('candidate') ? 'text-neu-success' : 
-        'text-neu-warning'
-      }`}>
-        <Icon className="w-10 h-10" />
+      <div
+        className={`rounded-2xl p-4 shadow-neu-inner transition-all duration-300 sm:p-5 ${
+          title.toLowerCase().includes("job")
+            ? "text-neu-primary"
+            : title.toLowerCase().includes("candidate")
+              ? "text-neu-success"
+              : "text-neu-warning"
+        }`}
+      >
+        <Icon className="h-8 w-8 sm:h-10 sm:w-10" />
       </div>
     </div>
   );

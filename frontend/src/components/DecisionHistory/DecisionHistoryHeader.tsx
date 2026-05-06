@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface DecisionHistoryHeaderProps {
   selectedJobId: number;
@@ -14,27 +14,33 @@ const DecisionHistoryHeader: React.FC<DecisionHistoryHeaderProps> = ({
   onNavigateRanking,
 }) => {
   return (
-    <div className="flex justify-between items-end">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-bold tracking-tight text-neu-text">Decision History</h2>
-        <p className="text-sm text-slate-500">Review all candidate decisions for Job Request <span className="font-mono">#{selectedJobId}</span></p>
+        <p className="eyebrow">Review trail</p>
+        <h2 className="text-2xl font-black tracking-tight text-neu-text sm:text-3xl">
+          Decision history
+        </h2>
+        <p className="text-sm leading-6 text-neu-text/55 sm:text-base">
+          Review recruiter outcomes for job request{" "}
+          <span className="font-mono">#{selectedJobId}</span>.
+        </p>
       </div>
-      <div className="flex gap-4 items-center">
-        <select 
-          value={filterAction} 
-          onChange={(e) => setFilterAction(e.target.value)} 
-          className="border-none text-sm rounded-lg py-2 px-4 bg-neu-surface shadow-neu-inner text-neu-text focus:outline-none transition-shadow font-bold"
+      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+        <select
+          value={filterAction}
+          onChange={(e) => setFilterAction(e.target.value)}
+          className="w-full rounded-2xl bg-neu-surface px-4 py-3 text-sm font-semibold text-neu-text shadow-neu-inner outline-none transition-shadow sm:w-auto"
         >
           <option value="All">All Statuses</option>
           <option value="Shortlist">Shortlisted</option>
           <option value="Hold">On Hold</option>
           <option value="Reject">Rejected</option>
         </select>
-        <button 
-          onClick={onNavigateRanking} 
-          className="text-sm text-neu-primary font-bold hover:underline transition"
+        <button
+          onClick={onNavigateRanking}
+          className="inline-flex items-center justify-center rounded-2xl bg-neu-surface px-4 py-3 text-sm font-semibold text-neu-primary shadow-neu-sm transition hover:shadow-neu"
         >
-          Back to Ranking
+          Back to ranking
         </button>
       </div>
     </div>

@@ -1,10 +1,16 @@
-import React from 'react';
+import React from "react";
 
 const JobSelectionHeader: React.FC = () => {
   return (
     <div className="flex flex-col gap-2">
-      <h2 className="text-2xl font-bold tracking-tight text-neu-text">Job Selection</h2>
-      <p className="text-sm text-slate-500">Select a Job Request to begin screening candidates.</p>
+      <p className="eyebrow">Role discovery</p>
+      <h2 className="text-2xl font-black tracking-tight text-neu-text sm:text-3xl">
+        Job catalog
+      </h2>
+      <p className="max-w-2xl text-sm leading-6 text-neu-text/55 sm:text-base">
+        Browse open roles, review requirements, and launch candidate screening
+        from a table that stays readable on smaller screens.
+      </p>
     </div>
   );
 };

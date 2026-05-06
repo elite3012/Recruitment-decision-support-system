@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { LockKeyhole, LogIn } from 'lucide-react';
-import { login } from '../api/client';
+import React, { useState } from "react";
+import { LockKeyhole, LogIn } from "lucide-react";
+import { login } from "../api/client";
 
 interface LoginProps {
   onLogin: (token: string, user: any) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -21,7 +21,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const response = await login(username, password);
       onLogin(response.access_token, response.user);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'Login failed');
+      setError(err?.response?.data?.detail || "Login failed");
     } finally {
       setSubmitting(false);
     }
@@ -29,36 +29,39 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-neu-secondary flex items-center justify-center p-6 text-neu-text">
-      <div className="w-full max-w-md bg-neu-surface shadow-neu rounded-3xl p-8">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-teal-600 text-white shadow-lg flex items-center justify-center">
+      <div className="w-full max-w-md rounded-[30px] bg-neu-surface p-8 shadow-neu sm:p-10">
+        <div className="mb-8 flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-lg">
             <LockKeyhole className="w-7 h-7" />
           </div>
           <div>
-            <h1 className="text-3xl font-black uppercase tracking-tight">RecruitAI</h1>
-            <p className="text-[10px] font-black text-neu-text/40 font-mono uppercase tracking-widest">
-              Secure HR workspace
-            </p>
+            <p className="eyebrow mb-1">Welcome back</p>
+            <h1 className="text-3xl font-black tracking-tight">RecruitAI</h1>
+            <p className="text-sm text-neu-text/45">Secure hiring workspace</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <label className="block space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-neu-text/50 font-mono">Username</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/50">
+              Username
+            </span>
             <input
               value={username}
               onChange={(event) => setUsername(event.target.value)}
-              className="w-full bg-neu-surface shadow-neu-inner rounded-2xl px-5 py-4 text-sm font-bold outline-none"
+              className="w-full rounded-2xl bg-neu-surface px-5 py-4 text-sm font-medium outline-none shadow-neu-inner"
               required
             />
           </label>
 
           <label className="block space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-neu-text/50 font-mono">Password</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/50">
+              Password
+            </span>
             <input
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full bg-neu-surface shadow-neu-inner rounded-2xl px-5 py-4 text-sm font-bold outline-none"
+              className="w-full rounded-2xl bg-neu-surface px-5 py-4 text-sm font-medium outline-none shadow-neu-inner"
               type="password"
               required
               autoFocus
@@ -74,14 +77,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full inline-flex items-center justify-center gap-3 bg-teal-600 text-white shadow-lg hover:bg-teal-700 active:scale-95 disabled:opacity-60 transition-all rounded-2xl px-5 py-4 text-[10px] font-black uppercase tracking-[0.25em]"
+            className="inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-teal-600 px-5 py-4 text-sm font-semibold text-white shadow-lg transition-all hover:bg-teal-700 active:scale-95 disabled:opacity-60"
           >
             <LogIn className="w-4 h-4" />
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="mt-6 text-[10px] leading-relaxed text-neu-text/40 font-bold font-mono">
+        <p className="mt-6 text-sm leading-6 text-neu-text/45">
           Default local account: admin / admin123. Change it after first login.
         </p>
       </div>

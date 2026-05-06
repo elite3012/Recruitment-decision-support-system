@@ -1,63 +1,138 @@
-import React from 'react';
-import { Search } from 'lucide-react';
+import React, { useMemo, useState } from "react";
+import { Search } from "lucide-react";
 
 interface JobSelectionTableProps {
   data: any[] | undefined;
   handleSelectJob: (id: number) => void;
 }
 
-const JobSelectionTable: React.FC<JobSelectionTableProps> = ({ data, handleSelectJob }) => {
+const JobSelectionTable: React.FC<JobSelectionTableProps> = ({
+  data,
+  handleSelectJob,
+}) => {
+  const [query, setQuery] = useState("");
+
+  const filteredJobs = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return data || [];
+
+    return (data || []).filter((job: any) =>
+      [job.title, job.location, job.skills]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedQuery),
+    );
+  }, [data, query]);
+
   return (
-    <div className="bg-neu-surface rounded-2xl shadow-neu flex flex-col h-[650px] overflow-hidden">
-      {/* Simple search bar header */}
-      <div className="p-4 flex items-center bg-neu-secondary gap-4 m-6 rounded-2xl shadow-neu-inner">
-        <Search className="w-5 h-5 text-neu-primary ml-2" />
-        <input 
-          type="text" 
-          placeholder="SEARCH_JOBS_CATALOG" 
-          className="w-full bg-transparent border-none text-[10px] font-black tracking-widest outline-none focus:ring-0 text-neu-text placeholder:text-slate-400 font-mono" 
-        />
+    <div className="flex min-h-[420px] flex-col overflow-hidden rounded-[28px] bg-neu-surface shadow-neu lg:min-h-[620px]">
+      <div className="flex flex-col gap-4 border-b border-white/35 p-4 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h3 className="text-xl font-black tracking-tight text-neu-text">
+            Open roles
+          </h3>
+          <p className="mt-1 text-sm text-neu-text/55">
+            Search by title, required skills, or location to jump into the right
+            hiring pipeline.
+          </p>
+        </div>
+
+        <div className="flex w-full flex-col gap-3 lg:max-w-xl lg:flex-row lg:items-center">
+          <div className="flex w-full items-center gap-3 rounded-2xl bg-neu-surface px-4 py-3 shadow-neu-inner">
+            <Search className="h-4 w-4 text-neu-primary" />
+            <input
+              type="text"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search titles, skills, or locations"
+              className="w-full bg-transparent text-sm font-medium text-neu-text outline-none placeholder:text-neu-text/35"
+            />
+          </div>
+          <div className="rounded-2xl bg-neu-surface px-4 py-3 text-sm font-semibold text-neu-text/55 shadow-neu-sm">
+            {filteredJobs.length} role{filteredJobs.length === 1 ? "" : "s"}
+          </div>
+        </div>
       </div>
 
-      {/* Scrollable table body */}
-      <div className="overflow-y-auto px-6 pb-6 flex-1">
+      <div className="table-shell flex-1 overflow-y-auto px-4 pb-4 sm:px-6 sm:pb-6">
         <table className="w-full text-left text-sm">
-          <thead className="sticky top-0 bg-neu-surface z-10">
+          <thead className="sticky top-0 z-10 bg-neu-surface">
             <tr>
-              <th className="px-6 py-4 text-[10px] uppercase text-slate-400 font-black tracking-[0.2em] border-b-2 border-neu-surface shadow-sm font-mono">ID</th>
-              <th className="px-6 py-4 text-[10px] uppercase text-slate-400 font-black tracking-[0.2em] border-b-2 border-neu-surface shadow-sm font-mono">TITLE</th>
-              <th className="px-6 py-4 text-[10px] uppercase text-slate-400 font-black tracking-[0.2em] border-b-2 border-neu-surface shadow-sm font-mono">STACK</th>
-              <th className="px-6 py-4 text-[10px] uppercase text-slate-400 font-black tracking-[0.2em] border-b-2 border-neu-surface shadow-sm font-mono">LOCATION</th>
-              <th className="px-6 py-4 text-[10px] uppercase text-slate-400 font-black tracking-[0.2em] border-b-2 border-neu-surface shadow-sm text-right font-mono">ACTION</th>
+              <th className="border-b-2 border-neu-surface px-4 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/40 sm:px-6">
+                ID
+              </th>
+              <th className="border-b-2 border-neu-surface px-4 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/40 sm:px-6">
+                Title
+              </th>
+              <th className="border-b-2 border-neu-surface px-4 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/40 sm:px-6">
+                Skills
+              </th>
+              <th className="border-b-2 border-neu-surface px-4 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/40 sm:px-6">
+                Location
+              </th>
+              <th className="border-b-2 border-neu-surface px-4 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-neu-text/40 sm:px-6">
+                Action
+              </th>
             </tr>
           </thead>
-          <tbody className="space-y-4">
-            {(data || []).map((job: any) => (
-              <tr key={job.id} className="border-b-4 border-transparent hover:shadow-neu-inner transition-all bg-neu-surface">
-                <td className="px-6 py-5 font-black text-neu-primary font-mono text-xs">{job.id}</td>
-                <td className="px-6 py-5 font-bold text-neu-text uppercase tracking-tight text-sm font-primary">{job.title}</td>
-                <td className="px-6 py-5">
-                   <div className="flex flex-wrap gap-2">
-                      {job.skills?.split(',').map((s: string, i: number) => (
-                        <span key={i} className="px-2 py-0.5 bg-neu-surface shadow-neu-sm rounded text-[9px] font-bold text-slate-500 uppercase font-mono">
-                          {s.trim()}
-                        </span>
-                      ))}
-                   </div>
+          <tbody className="align-top">
+            {filteredJobs.map((job: any) => (
+              <tr
+                key={job.id}
+                className="border-b border-white/35 bg-neu-surface transition-all hover:shadow-neu-inner"
+              >
+                <td className="px-4 py-5 text-xs font-black text-neu-primary sm:px-6">
+                  {job.id}
                 </td>
-                <td className="px-6 py-5 font-medium text-slate-500 text-xs uppercase font-mono">{job.location}</td>
-                <td className="px-6 py-5 text-right">
+                <td className="px-4 py-5 sm:px-6">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-neu-text sm:text-base">
+                      {job.title}
+                    </p>
+                    <p className="text-xs text-neu-text/45">
+                      {job.company_name || "Unspecified company"}
+                    </p>
+                  </div>
+                </td>
+                <td className="px-4 py-5 sm:px-6">
+                  <div className="flex max-w-md flex-wrap gap-2">
+                    {job.skills?.split(",").map((s: string, i: number) => (
+                      <span
+                        key={i}
+                        className="rounded-full bg-neu-surface px-3 py-1 text-xs font-medium text-neu-text/65 shadow-neu-sm"
+                      >
+                        {s.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </td>
+                <td className="px-4 py-5 text-sm font-medium text-neu-text/55 sm:px-6">
+                  {job.location || "Remote / flexible"}
+                </td>
+                <td className="px-4 py-5 text-right sm:px-6">
                   <button
                     onClick={() => handleSelectJob(job.id)}
-                    className="px-6 py-2 bg-neu-secondary text-neu-primary shadow-neu hover:bg-[#0D9488] hover:text-white active:scale-95 active:bg-[#0F766E] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 font-mono"
+                    className="rounded-2xl bg-neu-secondary px-4 py-2.5 text-sm font-semibold text-neu-primary shadow-neu-sm transition-all duration-300 hover:bg-[#0D9488] hover:text-white active:scale-95 active:bg-[#0F766E] sm:px-5"
                   >
-                    SCREEN
+                    View matches
                   </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {!filteredJobs.length && (
+          <div className="px-4 py-14 text-center sm:px-6">
+            <p className="text-lg font-bold text-neu-text">
+              No roles match that search.
+            </p>
+            <p className="mt-2 text-sm text-neu-text/45">
+              Try a different title, skill, or location keyword.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

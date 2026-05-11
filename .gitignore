@@ -73,6 +73,7 @@ Thumbs.db
 
 # Generated report / archive artifacts
 *.rar
+~$*.docx
 reports/chapter9_access_lab/
 reports/lo-test/
 reports/rendered/

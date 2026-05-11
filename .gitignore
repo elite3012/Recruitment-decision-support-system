@@ -58,6 +58,7 @@ data/processed/*.tmp
 # Database
 *.db
 *.sqlite
+*.accdb
 
 # Environment
 .env
@@ -69,3 +70,10 @@ Thumbs.db
 
 # Streamlit
 .streamlit/
+
+# Generated report / archive artifacts
+*.rar
+reports/chapter9_access_lab/
+reports/lo-test/
+reports/rendered/
+reports/render_test.docx

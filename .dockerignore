@@ -9,5 +9,13 @@ node_modules
 data/app.db
 data/processed
 data/raw
+reports
+tests
+training
+DESIGN.md
+README.md
+README_HF_SPACES.md
+start.bat
+start.ps1
 .env
 .env.local

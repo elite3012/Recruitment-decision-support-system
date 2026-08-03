@@ -1,0 +1,22 @@
+services:
+  recruitai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${RECRUITAI_PORT:-7860}:7860"
+    environment:
+      PORT: "7860"
+      DATABASE_PATH: /app/data/app.db
+      HF_HOME: /app/data/processed/hf_cache
+      TRANSFORMERS_CACHE: /app/data/processed/hf_cache
+      AUTH_SECRET: ${AUTH_SECRET:-local-dev-secret-change-me}
+      DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME:-admin}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-admin123}
+    volumes:
+      - recruitai-data:/app/data
+    init: true
+    restart: unless-stopped
+
+volumes:
+  recruitai-data:

@@ -122,6 +122,28 @@ npm install
 npm run dev
 ```
 
+### Docker
+
+Build and start the complete application with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:7860` after the container becomes healthy. SQLite data and the embedding cache are kept in the named `recruitai-data` volume.
+
+To stop the service:
+
+```bash
+docker compose down
+```
+
+To reset the local container data, including the seeded database:
+
+```bash
+docker compose down -v
+```
+
 FastAPI docs are available at:
 
 ```text

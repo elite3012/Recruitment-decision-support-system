@@ -30,6 +30,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/api/health")
+def health_check():
+    """Lightweight container health endpoint that does not load the ML model."""
+    return {"status": "ok"}
+
+
 inference_service = None
 VALID_DECISIONS = {"Shortlist", "Hold", "Reject"}
 AUTH_SECRET = os.getenv("AUTH_SECRET", "local-dev-secret-change-me")
@@ -120,7 +127,11 @@ class ChangePasswordRequest(BaseModel):
 def get_service() -> MatchingInferenceService:
     global inference_service
     if inference_service is None:
-        db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "app.db")
+        project_root = os.path.dirname(os.path.dirname(__file__))
+        configured_db_path = os.getenv("DATABASE_PATH")
+        db_path = configured_db_path or os.path.join(project_root, "data", "app.db")
+        if not os.path.isabs(db_path):
+            db_path = os.path.join(project_root, db_path)
         inference_service = MatchingInferenceService(db_path=db_path)
     return inference_service
 
